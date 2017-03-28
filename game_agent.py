@@ -161,14 +161,18 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
-
+            
+            maximizing_player = True
+            score, move = self.method(game,self.search_depth,maximizing_player)
+            
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
         return move
+    
+    
     
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -202,11 +206,36 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise Timeout()
+        if not legal_moves:
+            return 0, (-1, -1)
+        
+        def max_value (self, game):
+            if depth == self.search_depth:
+                return self.score(game.forecast_move(m), self)
+            
+            v = float("-inf")
+            for a in game.get_legal_moves(game):
+                v = max(v, min_value(game.result(state, a)))
+            
+            return v
+        
+        def min_value(self, game):
+            if depth == self.search_depth:
+                return self.score(game.forecast_move(m), self)
+            
+            v = float("inf")
+            
+            for a in game.actions(state):
+                v = min(v, max_value(game.result(state, a)))
+            return v
+        
+        return argmax(game.actions(state),
+                  key=lambda a: min_value(game.result(state, a)))
+        
+        
+        score, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        return score, move 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
