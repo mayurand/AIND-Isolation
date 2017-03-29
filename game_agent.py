@@ -8,10 +8,16 @@ relative strength using tournament.py and include the results in your report.
 """
 import random
 
+import timeit
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
+
+def curr_time_millis():
+    """Simple timer to return the current clock time in milliseconds."""
+    return 1000 * timeit.default_timer()
+
 
 def open_move_score(game, player):
     """The basic evaluation function described in lecture that outputs a score
@@ -150,11 +156,7 @@ class CustomPlayer:
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-
-        self.time_left = time_left
-        print(self.time_left)
-
-        # TODO: finish this function!
+        # TODO: Iterative deepening
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -163,20 +165,32 @@ class CustomPlayer:
         ## Check if any legal moves available
         if not legal_moves:
             return (-1, -1)
-        try:
-            # The search method call (alpha beta or minimax) should happen in
-            # here in order to avoid timeout. The try/except block will
-            # automatically catch the exception raised by the search method
-            # when the timer gets close to expiring
+        
+        ## If iterative deepening is allowed
+        if self.iterative:
 
-            score, move = self.method(game,self.search_depth)
+            for depth in range(1,100000000):
+                try:
+                    # The search method call (alpha beta or minimax) should happen in
+                    # here in order to avoid timeout. The try/except block will
+                    # automatically catch the exception raised by the search method
+                    # when the timer gets close to expiring
+                    
+                    score, move = self.method(game,depth)
+                    
+                except Timeout:
+                    # Return the best move from the last completed search iteration
+                    return move
             
-        except Timeout:
-            # Handle any actions required at timeout, if necessary
-            pass
-
-        # Return the best move from the last completed search iteration
-        return move
+            return move
+            
+        else:
+            try:
+                score, move = self.method(game,self.search_depth)
+                return move
+            except:
+                SystemError('Could not compute a move for given depth')
+    
     
     def cutoffTest(self,depth,plyCount,game):
         if depth == plyCount or game.get_legal_moves()==False:
@@ -184,6 +198,7 @@ class CustomPlayer:
         
         else:
             return False
+
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
@@ -335,8 +350,7 @@ class CustomPlayer:
         if maximizing_player:
             
             # Body of alphabeta_search:
-            best_score = float("-inf")
-            beta = float("inf")
+            best_score = alpha
             best_action = None
             for m in game.get_legal_moves():
                 v = min_value(game.forecast_move(m), plyCount+1, best_score, beta)
@@ -348,8 +362,7 @@ class CustomPlayer:
         
         else:
             # Body of alphabeta_search:
-            best_score = float("-inf")
-            beta = float("inf")
+            best_score = alpha
             best_action = None
             for m in game.get_legal_moves():
                 v = max_value(game.forecast_move(m), plyCount+1, best_score, beta)
