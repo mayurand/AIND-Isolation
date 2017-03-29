@@ -35,14 +35,37 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
+    if (game.get_blank_spaces() > game.height*game.width/1.5):
+        diffSquaredScores(game, player) # Try initially to increase the difference squared scores
+    else:
+        maximizingWinningChances(game, player) # After less blank spaces are left, try maximizing winning chances
+
+def diffSquaredScores(game, player):
+    ## This heuristic returns squared difference of player moves  
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
+    
+    playerMoves = float(len(game.get_legal_moves(player)))
+    opponentMoves = float(len(game.get_legal_moves(game.get_opponent(player))))
+    
+    return playerMoves*playerMoves - 1.25*opponentMoves*opponentMoves
 
-    print(float(len(game.get_legal_moves(player))))
-    return float(len(game.get_legal_moves(player)))
+
+def maximizingWinningChances(game, player):
+    ## This heuristic returns ratio of player moves left to the opponent moves left
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
+    playerMoves = float(len(game.get_legal_moves(player)))
+    opponentMoves = float(len(game.get_legal_moves(game.get_opponent(player))))
+
+    return playerMoves/opponentMoves
 
 
 class CustomPlayer:
@@ -119,8 +142,6 @@ class CustomPlayer:
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-        # TODO: Iterative deepening
-
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
@@ -153,6 +174,28 @@ class CustomPlayer:
         return move
     
     def cutoffTest(self,depth,plyCount,game):
+        """ 
+        cutoffTest to stop minimax or AlphaBeta search
+        Tests if any legal moves are remaining or if the plyCount is equal to depth for returning True
+        Parameters
+        ----------
+        game : `isolation.Board`
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        plyCount : int
+            Current number of plies done
+        depth : int
+            Depth is an integer representing the maximum number of plies to
+            search in the game tree before aborting
+
+        Returns
+        -------
+        (bool)
+            Cutoff Test is True or False
+            
+        """
+        
         if depth == plyCount or game.get_legal_moves()==False:
             return True
         
