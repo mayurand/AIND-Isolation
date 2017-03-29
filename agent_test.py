@@ -244,7 +244,7 @@ class Project1Test(unittest.TestCase):
             "The heuristic function should return a floating point")
 
     timeout(5)
-    @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
     def test_minimax_interface(self):
         """ Test CustomPlayer.minimax interface with simple input """
         h, w = 7, 7  # board size
@@ -358,7 +358,7 @@ class Project1Test(unittest.TestCase):
                        "on the current game board."))
 
     @timeout(5)
-    @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """ Test CustomPlayer.minimax
 

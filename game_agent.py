@@ -39,6 +39,7 @@ def open_move_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
+    print(float(len(game.get_legal_moves(player))))
     return float(len(game.get_legal_moves(player)))
 
 
@@ -65,8 +66,14 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    print(float(len(game.get_legal_moves(player))))
+    return float(len(game.get_legal_moves(player)))
 
 
 class CustomPlayer:
@@ -104,7 +111,7 @@ class CustomPlayer:
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
-        self.method = method
+        self.method = getattr(self,method)
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
 
@@ -162,8 +169,8 @@ class CustomPlayer:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
             
-            maximizing_player = True
-            score, move = self.method(game,self.search_depth,maximizing_player)
+            
+            score, move = self.method(game,self.search_depth)
             
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -206,36 +213,40 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
-        if not legal_moves:
-            return 0, (-1, -1)
         
-        def max_value (self, game):
-            if depth == self.search_depth:
-                return self.score(game.forecast_move(m), self)
+        def max_value (game, plyCount, player=self):
+            print('plyCount max:',plyCount)
+            if plyCount == depth:
+                return self.score(game, player)
             
             v = float("-inf")
-            for a in game.get_legal_moves(game):
-                v = max(v, min_value(game.result(state, a)))
+            
+            for a in game.get_legal_moves(player):
+                print('plyCount:',plyCount)
+                v = max(v, min_value(game.forecast_move(a),plyCount+1))
             
             return v
         
-        def min_value(self, game):
-            if depth == self.search_depth:
-                return self.score(game.forecast_move(m), self)
+        def min_value(game, plyCount,player=self):
+            print('plyCount min:',plyCount)
+            #print('depth:',depth)
             
+            if plyCount == depth:
+                return self.score(game, player)
+
             v = float("inf")
             
-            for a in game.actions(state):
-                v = min(v, max_value(game.result(state, a)))
+            for a in game.get_legal_moves(player):
+                v = min(v, max_value(game.forecast_move(a), plyCount+1))
             return v
-        
-        return argmax(game.actions(state),
-                  key=lambda a: min_value(game.result(state, a)))
-        
-        
-        score, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
 
-        return score, move 
+        plyCount =0
+        if maximizing_player:
+            return max([(min_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
+        
+        else:
+            return min([(max_value(game, m), m) for m in game.get_legal_moves()])
+
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
