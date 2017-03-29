@@ -63,8 +63,7 @@ Implement the following four functions in `game_agent.py`:
 - `CustomPlayer.get_move()`: implement fixed-depth and iterative deepening search
 - `custom_score()`: implement your own position evaluation heuristic
 
-You may write or modify code within each file (as long as you maintain compatibility with the function signatures provided) and you may add other classes, functions, etc., as needed, but it is not required.  
-
+You may write or modify code within each file (as long as you maintain compatibility with the function signatures provided) and you may add other classes, functions, etc., as needed, but it is not required.
 
 ### Coding
 
@@ -74,7 +73,7 @@ The steps below outline one suggested process for completing the project -- howe
 DONE
 
 0. Pass the test_minimax test by extending your `CustomPlayer.minimax()` function with the full recursive search process.  See Also: [AIMA Minimax Decision](https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md)
-
+DONE
 
 
 0. Pass the test_alphabeta_interface test by copying the code from `CustomPlayer.minimax()` into the `CustomPlayer.alphabeta()` function.

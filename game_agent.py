@@ -181,7 +181,6 @@ class CustomPlayer:
     
     
     
-
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
 
@@ -214,38 +213,35 @@ class CustomPlayer:
                 evaluation function directly.
         """
         
-        def max_value (game, plyCount, player=self):
-            print('plyCount max:',plyCount)
-            if plyCount == depth:
-                return self.score(game, player)
+        def max_value (game, plyCount):
+            
+            if depth == plyCount:
+                return self.score(game, self)
             
             v = float("-inf")
             
-            for a in game.get_legal_moves(player):
-                print('plyCount:',plyCount)
+            for a in game.get_legal_moves():
                 v = max(v, min_value(game.forecast_move(a),plyCount+1))
             
             return v
         
-        def min_value(game, plyCount,player=self):
-            print('plyCount min:',plyCount)
-            #print('depth:',depth)
-            
-            if plyCount == depth:
-                return self.score(game, player)
+        def min_value(game, plyCount):
+
+            if depth == plyCount:
+                return self.score(game, self)
 
             v = float("inf")
             
-            for a in game.get_legal_moves(player):
+            for a in game.get_legal_moves():
                 v = min(v, max_value(game.forecast_move(a), plyCount+1))
             return v
-
+            
         plyCount =0
         if maximizing_player:
             return max([(min_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
         
         else:
-            return min([(max_value(game, m), m) for m in game.get_legal_moves()])
+            return min([(max_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
