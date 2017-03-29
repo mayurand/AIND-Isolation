@@ -168,8 +168,7 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            
-            
+
             score, move = self.method(game,self.search_depth)
             
         except Timeout:
@@ -179,8 +178,13 @@ class CustomPlayer:
         # Return the best move from the last completed search iteration
         return move
     
-    
-    
+    def cutoffTest(self,depth,plyCount,game):
+        if depth == plyCount or game.get_legal_moves()==False:
+            return True
+        
+        else:
+            return False
+
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
 
@@ -216,7 +220,7 @@ class CustomPlayer:
         def max_value (game, plyCount):
             
             ## If the allowed depth is already reached then return the score based on evaluation function
-            if depth == plyCount:
+            if self.cutoffTest(depth,plyCount,game):
                 return self.score(game, self)
             
             v = float("-inf")
@@ -230,7 +234,7 @@ class CustomPlayer:
         
         def min_value(game, plyCount):
             ## If the allowed depth is already reached then return the score based on evaluation function
-            if depth == plyCount:
+            if self.cutoffTest(depth,plyCount,game):
                 return self.score(game, self)
 
             v = float("inf")
@@ -292,7 +296,7 @@ class CustomPlayer:
         
         def max_value (game, plyCount, alpha, beta):
             
-            if depth == plyCount:
+            if self.cutoffTest(depth,plyCount,game):
                 return self.score(game, self)
             
             v = float("-inf")
@@ -310,7 +314,7 @@ class CustomPlayer:
         
         def min_value(game, plyCount, alpha, beta):
 
-            if depth == plyCount:
+            if self.cutoffTest(depth,plyCount,game):
                 return self.score(game, self)
 
             v = float("inf")
@@ -327,6 +331,7 @@ class CustomPlayer:
             return v
             
         plyCount =0
+
         if maximizing_player:
             
             # Body of alphabeta_search:
@@ -342,5 +347,15 @@ class CustomPlayer:
             return best_score, best_action
         
         else:
-            return min([(max_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
+            # Body of alphabeta_search:
+            best_score = float("-inf")
+            beta = float("inf")
+            best_action = None
+            for m in game.get_legal_moves():
+                v = max_value(game.forecast_move(m), plyCount+1, best_score, beta)
+                if v < best_score:
+                    best_score = v
+                    best_action = m
+            
+            return best_score, best_action
 
