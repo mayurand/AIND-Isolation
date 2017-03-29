@@ -8,8 +8,6 @@ relative strength using tournament.py and include the results in your report.
 """
 import random
 
-import timeit
-
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
@@ -162,35 +160,32 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
         
+        self.time_left = time_left
+        iterDepth=1
         ## Check if any legal moves available
         if not legal_moves:
             return (-1, -1)
-        
+        try:
         ## If iterative deepening is allowed
-        if self.iterative:
-
-            for depth in range(1,100000000):
-                try:
+            if self.iterative:
+                for iterDepth in range(1,game.width*game.height):
                     # The search method call (alpha beta or minimax) should happen in
                     # here in order to avoid timeout. The try/except block will
                     # automatically catch the exception raised by the search method
                     # when the timer gets close to expiring
-                    
-                    score, move = self.method(game,depth)
-                    
-                except Timeout:
-                    # Return the best move from the last completed search iteration
-                    return move
-            
-            return move
-            
-        else:
-            try:
+                    score, move = self.method(game,iterDepth)
+                    if score == float('inf'):
+                        break
+            else:
                 score, move = self.method(game,self.search_depth)
-                return move
-            except:
-                SystemError('Could not compute a move for given depth')
-    
+        except Timeout:
+            pass
+        
+        if move == (-1, -1):
+            move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+        
+        # Return the best move from the last completed search iteration
+        return move
     
     def cutoffTest(self,depth,plyCount,game):
         if depth == plyCount or game.get_legal_moves()==False:
@@ -231,6 +226,8 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
         
         def max_value (game, plyCount):
             
@@ -308,6 +305,9 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
+        
         
         def max_value (game, plyCount, alpha, beta):
             
