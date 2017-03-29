@@ -215,29 +215,36 @@ class CustomPlayer:
         
         def max_value (game, plyCount):
             
+            ## If the allowed depth is already reached then return the score based on evaluation function
             if depth == plyCount:
                 return self.score(game, self)
             
             v = float("-inf")
             
+            ## Enumerate over all allowed moves in the current game state 
+            ## and Minimize over their resulting states recursively
             for a in game.get_legal_moves():
                 v = max(v, min_value(game.forecast_move(a),plyCount+1))
             
             return v
         
         def min_value(game, plyCount):
-
+            ## If the allowed depth is already reached then return the score based on evaluation function
             if depth == plyCount:
                 return self.score(game, self)
 
             v = float("inf")
             
+            ## Enumerate over all allowed moves in the current game state 
+            ## and Maximize over their resulting states recursively
             for a in game.get_legal_moves():
                 v = min(v, max_value(game.forecast_move(a), plyCount+1))
             return v
             
         plyCount =0
         if maximizing_player:
+            # Since it is a maximizing player, we take max of all the score,action tuples
+            # The subsequent would then be for the adversary i.e. minimizer
             return max([(min_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
         
         else:
@@ -282,8 +289,58 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise Timeout()
+        
+        def max_value (game, plyCount, alpha, beta):
+            
+            if depth == plyCount:
+                return self.score(game, self)
+            
+            v = float("-inf")
+            
+            for a in game.get_legal_moves():
+                v = max(v, min_value(game.forecast_move(a),plyCount+1, alpha, beta))
+                
+                ## If the value of v for the current game state is more than beta 
+                ## then return from there itself as there is no point in going further down the tree
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
+                
+            return v
+        
+        def min_value(game, plyCount, alpha, beta):
 
-        # TODO: finish this function!
-        raise NotImplementedError
+            if depth == plyCount:
+                return self.score(game, self)
+
+            v = float("inf")
+            
+            for a in game.get_legal_moves():
+                v = min(v, max_value(game.forecast_move(a), plyCount+1, alpha, beta))
+                
+                ## If the value of v for the current game state is less than alpha 
+                ## then return from there itself as there is no point in going further down the tree
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
+                
+            return v
+            
+        plyCount =0
+        if maximizing_player:
+            
+            # Body of alphabeta_search:
+            best_score = float("-inf")
+            beta = float("inf")
+            best_action = None
+            for m in game.get_legal_moves():
+                v = min_value(game.forecast_move(m), plyCount+1, best_score, beta)
+                if v > best_score:
+                    best_score = v
+                    best_action = m
+            
+            return best_score, best_action
+        
+        else:
+            return min([(max_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
+
