@@ -12,41 +12,6 @@ class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
-def curr_time_millis():
-    """Simple timer to return the current clock time in milliseconds."""
-    return 1000 * timeit.default_timer()
-
-
-def open_move_score(game, player):
-    """The basic evaluation function described in lecture that outputs a score
-    equal to the number of moves open for your computer player on the board.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : hashable
-        One of the objects registered by the game object as a valid player.
-        (i.e., `player` should be either game.__player_1__ or
-        game.__player_2__).
-
-    Returns
-    ----------
-    float
-        The heuristic value of the current game state
-    """
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    print(float(len(game.get_legal_moves(player))))
-    return float(len(game.get_legal_moves(player)))
-
-
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -110,7 +75,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=open_move_score,
+    def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='minimax', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
@@ -262,7 +227,6 @@ class CustomPlayer:
             # Since it is a maximizing player, we take max of all the score,action tuples
             # The subsequent would then be for the adversary i.e. minimizer
             return max([(min_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
-        
         else:
             return min([(max_value(game.forecast_move(m), plyCount+1), m) for m in game.get_legal_moves()])
 
