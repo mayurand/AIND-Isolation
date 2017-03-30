@@ -34,11 +34,12 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    ## This heuristic returns squared difference of player moves  
 
-    if (game.get_blank_spaces() > game.height*game.width/1.5):
-        diffSquaredScores(game, player) # Try initially to increase the difference squared scores
+    if (len(game.get_blank_spaces()) > game.height*game.width/1.5):
+        return diffSquaredScores(game, player) # Try initially to increase the difference squared scores
     else:
-        maximizingWinningChances(game, player) # After less blank spaces are left, try maximizing winning chances
+        return maximizingWinningChances(game, player) # After less blank spaces are left, try maximizing winning chances
 
 def diffSquaredScores(game, player):
     ## This heuristic returns squared difference of player moves  
@@ -48,10 +49,10 @@ def diffSquaredScores(game, player):
     if game.is_winner(player):
         return float("inf")
     
-    playerMoves = float(len(game.get_legal_moves(player)))
-    opponentMoves = float(len(game.get_legal_moves(game.get_opponent(player))))
+    playerMoves = len(game.get_legal_moves(player))
+    opponentMoves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    return playerMoves*playerMoves - 1.25*opponentMoves*opponentMoves
+    return float(playerMoves*playerMoves - 1.25*opponentMoves*opponentMoves)
 
 
 def maximizingWinningChances(game, player):
@@ -62,10 +63,14 @@ def maximizingWinningChances(game, player):
     if game.is_winner(player):
         return float("inf")
     
-    playerMoves = float(len(game.get_legal_moves(player)))
-    opponentMoves = float(len(game.get_legal_moves(game.get_opponent(player))))
+    playerMoves = len(game.get_legal_moves(player))
+    opponentMoves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    return playerMoves/opponentMoves
+    if opponentMoves>0:
+        return float(playerMoves/opponentMoves)
+    else:
+        return float(playerMoves)
+
 
 
 class CustomPlayer:
@@ -105,7 +110,7 @@ class CustomPlayer:
         self.score = score_fn
         self.method = getattr(self,method)
         self.time_left = None
-        self.TIMER_THRESHOLD = timeout
+        self.TIMER_THRESHOLD = timeout - 0.5
 
     def get_move(self, game, legal_moves, time_left):
         """Search for the best move from the available legal moves and return a
@@ -195,6 +200,9 @@ class CustomPlayer:
             Cutoff Test is True or False
             
         """
+        
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise Timeout()
         
         if depth == plyCount or game.get_legal_moves()==False:
             return True
