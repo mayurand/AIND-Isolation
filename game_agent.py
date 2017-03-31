@@ -34,12 +34,7 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    ## This heuristic returns squared difference of player moves  
-
-    if (len(game.get_blank_spaces()) > game.height*game.width/1.5):
-        return diffSquaredScores(game, player) # Try initially to increase the difference squared scores
-    else:
-        return maximizingWinningChances(game, player) # After less blank spaces are left, try maximizing winning chances
+    return combinedHeuristic(game,player)
 
 def diffSquaredScores(game, player):
     ## This heuristic returns squared difference of player moves  
@@ -52,7 +47,7 @@ def diffSquaredScores(game, player):
     playerMoves = len(game.get_legal_moves(player))
     opponentMoves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    return float(playerMoves*playerMoves - 1.25*opponentMoves*opponentMoves)
+    return float(playerMoves*playerMoves - opponentMoves*opponentMoves)
 
 
 def maximizingWinningChances(game, player):
@@ -70,6 +65,12 @@ def maximizingWinningChances(game, player):
         return float(playerMoves/opponentMoves)
     else:
         return float(playerMoves)
+
+def combinedHeuristic(game, player):
+    if (len(game.get_blank_spaces()) > game.height*game.width/2):
+        return maximizingWinningChances(game, player) # Try initially to increase the difference squared scores
+    else:
+        return diffSquaredScores(game, player) # After less blank spaces are left, try maximizing winning chances
 
 
 
